@@ -1,0 +1,43 @@
+// backend/models/AdminNotification.js
+import mongoose from 'mongoose';
+
+const adminNotificationSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    message: { type: String, required: true },
+    type: {
+      type: String,
+      enum: [
+        'booking_confirmed',
+        'booking_created',
+        'booking_cancelled',
+        'booking_rescheduled',
+        'reminder',
+        'general',
+        'low_stock',
+        'out_of_stock',
+      ],
+      default: 'general',
+    },
+    read: { type: Boolean, default: false },
+
+    // Reference to the appointment
+    appointmentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'appointment',
+      default: null,
+    },
+
+    // Multi-tenant
+    shopId: { type: String, default: 'SHOP001' },
+  },
+  { timestamps: true }
+);
+
+adminNotificationSchema.index({ shopId: 1, createdAt: -1 });
+adminNotificationSchema.index({ shopId: 1, read: 1 });
+
+const AdminNotification =
+  mongoose.models.adminNotification || mongoose.model('adminNotification', adminNotificationSchema);
+
+export default AdminNotification;
