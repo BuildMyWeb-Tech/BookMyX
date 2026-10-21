@@ -1,276 +1,417 @@
-import React, { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  Scissors, Dumbbell, Stethoscope, ArrowRight, Star, Users, Building2,
-  CheckCircle, ChevronRight, Shield, Zap, Globe, Phone, Mail,
-  Calendar, Clock, CreditCard, MessageCircle, Award, TrendingUp,
-  MapPin, Sparkles, Heart, Activity, Timer, Target, Menu, X,
+  Scissors, Dumbbell, Stethoscope, Star, ChevronRight, ArrowRight,
+  CheckCircle, Users, Calendar, Shield, Zap, MapPin,
+  Globe, Menu, X, TrendingUp, Award, Heart,
+  Play, Sparkles,
 } from 'lucide-react';
 
-const WHATSAPP_NUMBER = '919344095727';
+// ──────────────────────────────────────────────────────────────
+// Static data
+// ──────────────────────────────────────────────────────────────
+const STATS = [
+  { value: '500+', label: 'Vendors onboarded', icon: <Award size={20} /> },
+  { value: '50K+', label: 'Bookings completed', icon: <Calendar size={20} /> },
+  { value: '98%', label: 'Satisfaction rate', icon: <Heart size={20} /> },
+  { value: '25+', label: 'Cities covered', icon: <MapPin size={20} /> },
+];
 
-const categories = [
+const CATEGORIES = [
   {
-    id: 'salon',
-    label: 'Salon & Spa',
-    icon: Scissors,
-    color: 'from-rose-500 to-pink-600',
-    bg: 'bg-rose-50',
-    border: 'border-rose-200',
-    text: 'text-rose-600',
-    badge: 'bg-rose-100 text-rose-700',
-    desc: 'Haircuts, beauty treatments, spa services, nail care and more.',
-    features: ['Stylist profiles & scheduling', 'Service catalogue with pricing', 'POS billing & coupons', 'WhatsApp broadcast'],
-    slug: 'your-salon',
-  },
-  {
-    id: 'turf',
-    label: 'Sports Turf',
-    icon: Dumbbell,
-    color: 'from-emerald-500 to-teal-600',
-    bg: 'bg-emerald-50',
-    border: 'border-emerald-200',
-    text: 'text-emerald-600',
-    badge: 'bg-emerald-100 text-emerald-700',
-    desc: 'Football, cricket, badminton and multi-sport turf bookings.',
-    features: ['Hourly slot availability', 'Online slot reservations', 'Payment tracking', 'Facility showcase'],
-    slug: 'your-turf',
-  },
-  {
-    id: 'doctor',
-    label: 'Doctor / Clinic',
-    icon: Stethoscope,
+    key: 'salon',
+    icon: <Scissors size={28} />,
+    label: 'Salon & Beauty',
+    tagline: 'Hair, nails, skincare & more',
     color: 'from-blue-500 to-indigo-600',
     bg: 'bg-blue-50',
     border: 'border-blue-200',
-    text: 'text-blue-600',
-    badge: 'bg-blue-100 text-blue-700',
-    desc: 'Appointment management for clinics, hospitals and specialists.',
-    features: ['Doctor profiles & specializations', 'Appointment slots', 'Patient management', 'Prescription & payment tracking'],
-    slug: 'your-clinic',
+    text: 'text-blue-700',
+    accent: 'text-blue-600',
+    description: 'Premium salon experiences with expert stylists, real-time availability, and instant booking.',
+    features: ['Stylist selection', 'Service packages', 'Coupons & loyalty', 'Billing & receipts'],
+    emoji: '✂️',
+  },
+  {
+    key: 'turf',
+    icon: <Dumbbell size={28} />,
+    label: 'Sports Turf',
+    tagline: 'Cricket, football, badminton & more',
+    color: 'from-emerald-500 to-teal-600',
+    bg: 'bg-emerald-50',
+    border: 'border-emerald-200',
+    text: 'text-emerald-700',
+    accent: 'text-emerald-600',
+    description: 'Book your favourite sports ground by the hour with transparent pricing and instant confirmation.',
+    features: ['Hourly slot booking', 'Multi-sport grounds', 'Online payment', 'Cancellation support'],
+    emoji: '⚽',
+  },
+  {
+    key: 'doctor_clinic',
+    icon: <Stethoscope size={28} />,
+    label: 'Doctor & Clinic',
+    tagline: 'Consultations, check-ups & more',
+    color: 'from-sky-500 to-cyan-600',
+    bg: 'bg-sky-50',
+    border: 'border-sky-200',
+    text: 'text-sky-700',
+    accent: 'text-sky-600',
+    description: 'Seamless clinic management — patient scheduling, doctor availability, and smart reminders.',
+    features: ['Doctor profiles', 'Appointment slots', 'Patient management', 'Notifications'],
+    emoji: '🏥',
   },
 ];
 
-const stats = [
-  { value: '500+', label: 'Vendors Onboarded', icon: Building2 },
-  { value: '50K+', label: 'Bookings Made', icon: Calendar },
-  { value: '3', label: 'Business Categories', icon: Layers2 },
-  { value: '99.9%', label: 'Uptime', icon: Shield },
+const TESTIMONIALS = [
+  {
+    name: 'Priya Sharma',
+    role: 'Salon owner · Mumbai',
+    avatar: 'PS',
+    rating: 5,
+    text: 'BookmyX transformed how we manage appointments. Our no-shows dropped by 60% and revenue is up.',
+    color: 'bg-blue-100 text-blue-700',
+  },
+  {
+    name: 'Rahul Menon',
+    role: 'Turf manager · Bangalore',
+    avatar: 'RM',
+    rating: 5,
+    text: 'We went from pen-and-paper booking to fully digital in 2 days. Customers love the online slots.',
+    color: 'bg-emerald-100 text-emerald-700',
+  },
+  {
+    name: 'Dr. Anita Rao',
+    role: 'Clinic · Hyderabad',
+    avatar: 'AR',
+    rating: 5,
+    text: 'Patient management has never been easier. The notification system alone saves my staff 2 hours daily.',
+    color: 'bg-sky-100 text-sky-700',
+  },
 ];
 
-function Layers2(props) {
-  return (
-    <svg {...props} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/>
-      <path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/>
-      <path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/>
-    </svg>
-  );
-}
+const HOW_IT_WORKS = [
+  {
+    step: '01',
+    title: 'Register your business',
+    desc: 'Sign up, submit your details and get approved by our team within 24 hours.',
+    icon: <Globe size={22} />,
+  },
+  {
+    step: '02',
+    title: 'Set up your storefront',
+    desc: 'Add services, staff, pricing, slots and working hours — all from one dashboard.',
+    icon: <Zap size={22} />,
+  },
+  {
+    step: '03',
+    title: 'Start accepting bookings',
+    desc: 'Customers find your page, book instantly, and receive automatic confirmations.',
+    icon: <Calendar size={22} />,
+  },
+];
 
+// ──────────────────────────────────────────────────────────────
+// Component
+// ──────────────────────────────────────────────────────────────
 export default function PlatformRoot() {
   const navigate = useNavigate();
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('salon');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [activeCategory, setActiveCategory] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
+  const heroRef = useRef(null);
 
-  const whatsappLink = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hi, I want to onboard my business on BookmyX')}`;
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', handler);
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
 
-  const active = categories.find(c => c.id === activeCategory);
+  // Auto-cycle categories
+  useEffect(() => {
+    const t = setInterval(() => setActiveCategory(c => (c + 1) % CATEGORIES.length), 4000);
+    return () => clearInterval(t);
+  }, []);
+
+  const cat = CATEGORIES[activeCategory];
 
   return (
-    <div className="min-h-screen bg-white font-sans">
+    <div className="min-h-screen bg-white text-gray-900 overflow-x-hidden">
 
-      {/* ── Navbar ── */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-indigo-700 rounded-lg flex items-center justify-center">
-              <Sparkles size={16} className="text-white" />
+      {/* ─── NAVBAR ─────────────────────────────────────────── */}
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm border-b border-gray-100' : 'bg-transparent'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => navigate('/')}>
+              <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-purple-700 rounded-lg flex items-center justify-center">
+                <Sparkles size={16} className="text-white" />
+              </div>
+              <span className="font-bold text-lg text-gray-900">BookmyX</span>
             </div>
-            <span className="text-xl font-bold bg-gradient-to-r from-violet-700 to-indigo-600 bg-clip-text text-transparent">
-              BookmyX
-            </span>
-          </div>
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-600">
-            <a href="#features" className="hover:text-violet-600 transition-colors">Features</a>
-            <a href="#categories" className="hover:text-violet-600 transition-colors">Categories</a>
-            <a href="#how-it-works" className="hover:text-violet-600 transition-colors">How It Works</a>
-            <a href={whatsappLink} target="_blank" rel="noreferrer" className="hover:text-violet-600 transition-colors">Contact</a>
-          </div>
-          <div className="hidden md:flex items-center gap-3">
-            <a href="/super-admin/login" className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1.5 rounded-lg hover:bg-gray-50 transition-colors">Admin Login</a>
-            <button
-              onClick={() => navigate('/create-salon')}
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white text-sm px-4 py-2 rounded-xl font-medium hover:opacity-90 transition-opacity flex items-center gap-1.5"
-            >
-              Register Business <ArrowRight size={14} />
+
+            {/* Desktop nav */}
+            <nav className="hidden md:flex items-center gap-8">
+              {['Features', 'How it works', 'Categories'].map(item => (
+                <button key={item} className={`text-sm font-medium transition-colors ${scrolled ? 'text-gray-600 hover:text-gray-900' : 'text-white/80 hover:text-white'}`}>
+                  {item}
+                </button>
+              ))}
+            </nav>
+
+            <div className="hidden md:flex items-center gap-3">
+              <button
+                onClick={() => navigate('/super-admin')}
+                className={`text-sm font-medium px-4 py-2 rounded-lg transition-colors ${scrolled ? 'text-gray-600 hover:text-gray-900' : 'text-white/80 hover:text-white'}`}
+              >
+                Sign in
+              </button>
+              <button
+                onClick={() => navigate('/create-salon')}
+                className="text-sm font-semibold px-5 py-2.5 bg-gradient-to-r from-violet-600 to-purple-700 text-white rounded-xl hover:opacity-90 transition-all shadow-lg shadow-violet-200"
+              >
+                List your business
+              </button>
+            </div>
+
+            {/* Mobile menu button */}
+            <button className="md:hidden p-2 rounded-lg text-gray-600" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
           </div>
-          <button className="md:hidden text-gray-600" onClick={() => setMenuOpen(o => !o)}>
-            {menuOpen ? <X size={22} /> : <Menu size={22} />}
-          </button>
         </div>
-        {menuOpen && (
-          <div className="md:hidden border-t border-gray-100 bg-white px-4 py-4 flex flex-col gap-3 text-sm">
-            <a href="#features" className="text-gray-600 py-1" onClick={() => setMenuOpen(false)}>Features</a>
-            <a href="#categories" className="text-gray-600 py-1" onClick={() => setMenuOpen(false)}>Categories</a>
-            <a href="#how-it-works" className="text-gray-600 py-1" onClick={() => setMenuOpen(false)}>How It Works</a>
-            <a href={whatsappLink} target="_blank" rel="noreferrer" className="text-gray-600 py-1">Contact</a>
-            <button
-              onClick={() => navigate('/create-salon')}
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-4 py-2 rounded-xl font-medium text-center"
-            >
-              Register Your Business
-            </button>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <div className="md:hidden bg-white border-t border-gray-100 px-4 py-4 space-y-3">
+            {['Features', 'How it works', 'Categories'].map(item => (
+              <button key={item} className="block w-full text-left text-sm font-medium text-gray-700 py-2">{item}</button>
+            ))}
+            <div className="pt-2 space-y-2">
+              <button onClick={() => navigate('/create-salon')} className="block w-full text-center py-3 bg-gradient-to-r from-violet-600 to-purple-700 text-white rounded-xl text-sm font-semibold">
+                List your business
+              </button>
+            </div>
           </div>
         )}
-      </nav>
+      </header>
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-violet-50 to-indigo-50 pt-20 pb-24">
-        <div className="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,rgba(255,255,255,0.6))] -z-10" />
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 text-center">
-          <div className="inline-flex items-center gap-2 bg-violet-100 text-violet-700 px-4 py-1.5 rounded-full text-sm font-medium mb-6">
-            <Sparkles size={14} />
-            India's Multi-Category Booking Platform
+      {/* ─── HERO ───────────────────────────────────────────── */}
+      <section ref={heroRef} className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-violet-950 to-purple-900">
+        {/* Animated background blobs */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -left-40 w-96 h-96 bg-violet-600/20 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute top-1/3 -right-32 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
+          <div className="absolute bottom-0 left-1/3 w-72 h-72 bg-indigo-600/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.03]" style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,1) 1px, transparent 1px)', backgroundSize: '48px 48px' }} />
+
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-16 text-center">
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-white/80 rounded-full px-4 py-1.5 text-xs font-medium mb-8 backdrop-blur-sm">
+            <Sparkles size={12} className="text-violet-300" />
+            India&apos;s fastest growing booking platform
           </div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-gray-900 leading-tight mb-6">
-            One Platform,<br />
-            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-              Every Business
+
+          {/* Headline */}
+          <h1 className="text-4xl sm:text-5xl md:text-7xl font-extrabold text-white leading-tight tracking-tight mb-6">
+            One platform,
+            <br />
+            <span className="bg-gradient-to-r from-violet-300 via-pink-300 to-indigo-300 bg-clip-text text-transparent">
+              every booking.
             </span>
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 max-w-2xl mx-auto mb-10">
-            BookmyX powers salons, sports turfs, and medical clinics with dedicated booking pages,
-            real-time slots and complete business management — all under one roof.
+
+          <p className="text-lg sm:text-xl text-white/60 max-w-2xl mx-auto mb-10 leading-relaxed">
+            BookmyX powers salons, sports turfs, and clinics with a smart booking system your customers will love.
           </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+
+          {/* CTAs */}
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
             <button
               onClick={() => navigate('/create-salon')}
-              className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-8 py-3.5 rounded-2xl font-semibold text-base hover:opacity-90 transition-opacity flex items-center gap-2 shadow-lg shadow-violet-200"
+              className="group flex items-center gap-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 text-white font-semibold px-8 py-4 rounded-2xl shadow-xl shadow-violet-900/40 transition-all text-base"
             >
-              Register Your Business <ArrowRight size={18} />
+              Get started free
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
-            <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center gap-2 text-gray-700 border border-gray-200 bg-white px-6 py-3.5 rounded-2xl font-medium hover:border-violet-300 hover:text-violet-700 transition-colors"
-            >
-              <MessageCircle size={18} className="text-green-500" />
-              Chat on WhatsApp
-            </a>
+            <button className="flex items-center gap-2 text-white/80 hover:text-white font-medium px-6 py-4 rounded-2xl border border-white/20 hover:border-white/40 transition-all text-sm backdrop-blur-sm">
+              <Play size={16} className="fill-current" />
+              Watch demo
+            </button>
           </div>
-        </div>
 
-        {/* Category pills */}
-        <div className="max-w-4xl mx-auto px-4 mt-14 flex flex-wrap justify-center gap-4">
-          {categories.map(cat => (
-            <div key={cat.id} className={`flex items-center gap-2 ${cat.bg} ${cat.border} border rounded-full px-5 py-2.5 text-sm font-medium ${cat.text} shadow-sm`}>
-              <cat.icon size={16} />
-              {cat.label}
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Stats ── */}
-      <section className="py-14 border-y border-gray-100 bg-white">
-        <div className="max-w-5xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
-          {stats.map(s => (
-            <div key={s.label} className="text-center">
-              <div className="flex justify-center mb-2">
-                <s.icon size={22} className="text-violet-500" />
-              </div>
-              <div className="text-3xl font-extrabold text-gray-900">{s.value}</div>
-              <div className="text-sm text-gray-500 mt-1">{s.label}</div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* ── Categories ── */}
-      <section id="categories" className="py-20 bg-gray-50">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Built for Your Business</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">Choose your category and get a fully branded booking page with all tools your business needs.</p>
-          </div>
-          <div className="flex justify-center gap-3 mb-10 flex-wrap">
-            {categories.map(cat => (
+          {/* Category pills */}
+          <div className="flex flex-wrap items-center justify-center gap-3">
+            {CATEGORIES.map((c, i) => (
               <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-medium transition-all ${
-                  activeCategory === cat.id
-                    ? `bg-gradient-to-r ${cat.color} text-white shadow-md`
-                    : 'bg-white border border-gray-200 text-gray-600 hover:border-gray-300'
+                key={c.key}
+                onClick={() => setActiveCategory(i)}
+                className={`flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-medium transition-all ${
+                  i === activeCategory
+                    ? 'bg-white text-gray-900 border-white shadow-lg'
+                    : 'bg-white/10 text-white/70 border-white/20 hover:bg-white/20'
                 }`}
               >
-                <cat.icon size={15} />
-                {cat.label}
+                {c.emoji} {c.label}
               </button>
             ))}
           </div>
-          {active && (
-            <div className="bg-white rounded-3xl border border-gray-100 shadow-sm overflow-hidden max-w-4xl mx-auto">
-              <div className={`bg-gradient-to-r ${active.color} px-8 py-10 text-white`}>
-                <div className="flex items-start gap-5">
-                  <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center shrink-0">
-                    <active.icon size={28} />
-                  </div>
-                  <div>
-                    <div className={`inline-block ${active.badge} px-3 py-1 rounded-full text-xs font-semibold mb-2`}>{active.label}</div>
-                    <h3 className="text-2xl font-bold mb-2">{active.label} Booking Platform</h3>
-                    <p className="text-white/80">{active.desc}</p>
-                  </div>
-                </div>
-              </div>
-              <div className="p-8 grid sm:grid-cols-2 gap-4">
-                {active.features.map(f => (
-                  <div key={f} className="flex items-center gap-3">
-                    <CheckCircle size={18} className={active.text} />
-                    <span className="text-gray-700 text-sm">{f}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="px-8 pb-8">
-                <button
-                  onClick={() => navigate('/create-salon')}
-                  className={`bg-gradient-to-r ${active.color} text-white px-6 py-3 rounded-xl font-medium flex items-center gap-2 hover:opacity-90 transition-opacity`}
-                >
-                  Register as {active.label} <ChevronRight size={16} />
-                </button>
-              </div>
-            </div>
-          )}
+        </div>
+
+        {/* Scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+          <div className="w-5 h-8 border-2 border-white/30 rounded-full flex items-start justify-center pt-1.5">
+            <div className="w-1 h-2 bg-white/60 rounded-full animate-pulse" />
+          </div>
         </div>
       </section>
 
-      {/* ── Features ── */}
-      <section id="features" className="py-20 bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Everything You Need</h2>
-            <p className="text-gray-500 max-w-xl mx-auto">One platform with all the tools to run, grow and manage your business online.</p>
+      {/* ─── STATS ──────────────────────────────────────────── */}
+      <section className="bg-white py-16 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {STATS.map((s, i) => (
+              <div key={i} className="text-center p-6 rounded-2xl bg-gray-50 hover:bg-gray-100 transition-colors">
+                <div className="w-10 h-10 bg-violet-100 text-violet-600 rounded-xl flex items-center justify-center mx-auto mb-3">
+                  {s.icon}
+                </div>
+                <div className="text-3xl font-extrabold text-gray-900 mb-1">{s.value}</div>
+                <div className="text-sm text-gray-500">{s.label}</div>
+              </div>
+            ))}
           </div>
+        </div>
+      </section>
+
+      {/* ─── CATEGORIES ─────────────────────────────────────── */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-block text-xs font-semibold text-violet-600 bg-violet-50 border border-violet-200 rounded-full px-4 py-1.5 mb-4 tracking-widest uppercase">
+              What we support
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-gray-900 leading-tight">
+              Built for every <span className="text-violet-600">vertical</span>
+            </h2>
+            <p className="text-gray-500 mt-4 max-w-xl mx-auto">
+              Each category gets a tailored experience — with the right features, the right UI, and the right workflows.
+            </p>
+          </div>
+
+          {/* Tab selector */}
+          <div className="flex justify-center gap-2 mb-10 flex-wrap">
+            {CATEGORIES.map((c, i) => (
+              <button
+                key={c.key}
+                onClick={() => setActiveCategory(i)}
+                className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold border transition-all ${
+                  i === activeCategory
+                    ? `bg-gradient-to-r ${c.color} text-white border-transparent shadow-lg`
+                    : `${c.bg} ${c.text} ${c.border} hover:shadow-sm`
+                }`}
+              >
+                {c.emoji} {c.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Category detail card */}
+          <div className={`rounded-3xl border ${cat.border} ${cat.bg} p-8 sm:p-12 transition-all`}>
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className={`w-14 h-14 bg-gradient-to-br ${cat.color} rounded-2xl flex items-center justify-center text-white mb-6 shadow-lg`}>
+                  {cat.icon}
+                </div>
+                <h3 className="text-3xl font-extrabold text-gray-900 mb-3">{cat.label}</h3>
+                <p className={`text-sm font-medium ${cat.accent} mb-4`}>{cat.tagline}</p>
+                <p className="text-gray-600 mb-6 leading-relaxed">{cat.description}</p>
+                <ul className="space-y-2 mb-8">
+                  {cat.features.map(f => (
+                    <li key={f} className="flex items-center gap-2.5 text-sm text-gray-700">
+                      <CheckCircle size={16} className={cat.accent} />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  onClick={() => navigate('/create-salon')}
+                  className={`inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r ${cat.color} text-white rounded-xl font-semibold text-sm hover:opacity-90 transition-all shadow-lg`}
+                >
+                  Register as {cat.label} <ChevronRight size={16} />
+                </button>
+              </div>
+
+              {/* Visual placeholder — feature grid */}
+              <div className="grid grid-cols-2 gap-3">
+                {['Dashboard', 'Bookings', 'Customers', 'Analytics', 'Payments', 'Settings'].map((item, idx) => (
+                  <div key={item} className={`bg-white rounded-2xl border border-white/80 p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md ${idx === 0 ? 'col-span-2' : ''}`}>
+                    <div className={`w-8 h-8 bg-gradient-to-br ${cat.color} rounded-lg flex items-center justify-center mb-2`}>
+                      <div className="w-3 h-3 bg-white/80 rounded-sm" />
+                    </div>
+                    <p className="text-xs font-semibold text-gray-700">{item}</p>
+                    <p className="text-xs text-gray-400 mt-0.5">Feature module</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── HOW IT WORKS ───────────────────────────────────── */}
+      <section className="py-24 bg-gradient-to-b from-gray-50 to-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <div className="inline-block text-xs font-semibold text-violet-600 bg-violet-50 border border-violet-200 rounded-full px-4 py-1.5 mb-4 tracking-widest uppercase">
+              Simple onboarding
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-gray-900">Up and running in minutes</h2>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {HOW_IT_WORKS.map((step, i) => (
+              <div key={i} className="relative">
+                {i < HOW_IT_WORKS.length - 1 && (
+                  <div className="hidden md:block absolute top-8 left-full w-full h-px bg-gradient-to-r from-violet-200 to-transparent z-0" />
+                )}
+                <div className="relative z-10 bg-white rounded-2xl border border-gray-100 shadow-sm p-8 hover:shadow-md transition-all">
+                  <div className="text-5xl font-black text-gray-100 mb-4 leading-none">{step.step}</div>
+                  <div className="w-10 h-10 bg-violet-100 text-violet-600 rounded-xl flex items-center justify-center mb-4">
+                    {step.icon}
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{step.title}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed">{step.desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── FEATURES GRID ──────────────────────────────────── */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-gray-900">Everything you need</h2>
+            <p className="text-gray-500 mt-4 max-w-xl mx-auto">One platform that covers the full lifecycle — from booking to billing to analytics.</p>
+          </div>
+
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {[
-              { icon: Globe, title: 'Your Own Booking Page', desc: 'Get a branded URL like /your-salon with a professional booking page.' },
-              { icon: Calendar, title: 'Smart Slot Management', desc: 'Configure working hours, holidays and special schedules effortlessly.' },
-              { icon: CreditCard, title: 'Online & Offline Payments', desc: 'Accept UPI, cash and card. Integrated QR code for instant collection.' },
-              { icon: Shield, title: 'Strict Tenant Isolation', desc: 'Customer data, bookings and logins are fully isolated per vendor.' },
-              { icon: Users, title: 'Staff / Stylist Panel', desc: 'Separate login for staff with their own appointment views.' },
-              { icon: TrendingUp, title: 'Reports & Analytics', desc: 'Revenue charts, booking trends and business insights at a glance.' },
-              { icon: MessageCircle, title: 'WhatsApp Broadcast', desc: 'Send bulk booking reminders and promotions directly on WhatsApp.' },
-              { icon: Award, title: 'Coupons & Packages', desc: 'Create discount coupons and combo packages to boost retention.' },
-              { icon: Zap, title: 'Real-Time Notifications', desc: 'Instant booking alerts via Socket.IO for admins and customers.' },
-            ].map(f => (
-              <div key={f.title} className="p-6 rounded-2xl border border-gray-100 hover:border-violet-200 hover:shadow-md transition-all bg-white group">
-                <div className="w-11 h-11 rounded-xl bg-violet-50 flex items-center justify-center mb-4 group-hover:bg-violet-100 transition-colors">
-                  <f.icon size={20} className="text-violet-600" />
+              { icon: <Calendar size={22} />, title: 'Smart Scheduling', desc: 'Dynamic slot generation with block dates, holidays and buffer times.', color: 'bg-violet-100 text-violet-600' },
+              { icon: <Users size={22} />, title: 'Staff Management', desc: 'Manage stylists, doctors or staff with individual profiles and availability.', color: 'bg-blue-100 text-blue-600' },
+              { icon: <TrendingUp size={22} />, title: 'Revenue Analytics', desc: 'Track bookings, earnings, and trends with beautiful real-time charts.', color: 'bg-emerald-100 text-emerald-600' },
+              { icon: <Shield size={22} />, title: 'Secure Payments', desc: 'Integrated payment tracking with bill generation and tax settings.', color: 'bg-sky-100 text-sky-600' },
+              { icon: <Zap size={22} />, title: 'Instant Notifications', desc: 'Real-time alerts via Socket.IO and WhatsApp broadcast to your customers.', color: 'bg-orange-100 text-orange-600' },
+              { icon: <Star size={22} />, title: 'Coupons & Packages', desc: 'Drive retention with discount coupons, loyalty packages and special deals.', color: 'bg-pink-100 text-pink-600' },
+            ].map((f, i) => (
+              <div key={i} className="group bg-white border border-gray-100 rounded-2xl p-6 hover:shadow-md hover:-translate-y-0.5 transition-all">
+                <div className={`w-11 h-11 ${f.color} rounded-xl flex items-center justify-center mb-4`}>
+                  {f.icon}
                 </div>
-                <h4 className="font-semibold text-gray-900 mb-2">{f.title}</h4>
+                <h3 className="font-bold text-gray-900 mb-2">{f.title}</h3>
                 <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
               </div>
             ))}
@@ -278,69 +419,103 @@ export default function PlatformRoot() {
         </div>
       </section>
 
-      {/* ── How It Works ── */}
-      <section id="how-it-works" className="py-20 bg-gradient-to-br from-violet-50 to-indigo-50">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
-          <div className="text-center mb-14">
-            <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">Get Started in Minutes</h2>
+      {/* ─── TESTIMONIALS ───────────────────────────────────── */}
+      <section className="py-24 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl sm:text-5xl font-extrabold text-gray-900">Loved by businesses</h2>
+            <p className="text-gray-500 mt-4">Real feedback from real vendors using BookmyX every day.</p>
           </div>
-          <div className="grid sm:grid-cols-3 gap-8">
-            {[
-              { step: '01', title: 'Register Your Business', desc: 'Submit your details — name, category, contact and admin credentials.', icon: Building2 },
-              { step: '02', title: 'Get Approved', desc: 'Our team reviews and activates your vendor account within 24 hours.', icon: CheckCircle },
-              { step: '03', title: 'Go Live', desc: 'Access your admin panel and share your unique booking link with customers.', icon: Zap },
-            ].map(s => (
-              <div key={s.step} className="bg-white rounded-2xl p-7 shadow-sm border border-violet-100 text-center">
-                <div className="w-12 h-12 bg-gradient-to-br from-violet-600 to-indigo-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <s.icon size={22} className="text-white" />
+
+          <div className="grid md:grid-cols-3 gap-6">
+            {TESTIMONIALS.map((t, i) => (
+              <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-7 hover:shadow-md transition-all">
+                <div className="flex gap-0.5 mb-4">
+                  {Array.from({ length: t.rating }).map((_, j) => (
+                    <Star key={j} size={14} className="text-amber-400 fill-amber-400" />
+                  ))}
                 </div>
-                <div className="text-5xl font-black text-violet-100 mb-2">{s.step}</div>
-                <h4 className="font-bold text-gray-900 mb-2">{s.title}</h4>
-                <p className="text-sm text-gray-500">{s.desc}</p>
+                <p className="text-gray-700 text-sm leading-relaxed mb-5">&quot;{t.text}&quot;</p>
+                <div className="flex items-center gap-3">
+                  <div className={`w-9 h-9 rounded-full ${t.color} flex items-center justify-center text-xs font-bold`}>{t.avatar}</div>
+                  <div>
+                    <p className="text-sm font-semibold text-gray-900">{t.name}</p>
+                    <p className="text-xs text-gray-400">{t.role}</p>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── CTA ── */}
-      <section className="py-20 bg-gradient-to-r from-violet-600 to-indigo-700 text-white">
-        <div className="max-w-3xl mx-auto px-4 text-center">
-          <Sparkles size={32} className="mx-auto mb-4 text-violet-200" />
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">Ready to Transform Your Business?</h2>
-          <p className="text-violet-200 mb-8 text-lg">Join hundreds of vendors who trust BookmyX for their online booking needs.</p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      {/* ─── CTA BANNER ─────────────────────────────────────── */}
+      <section className="py-24 bg-gradient-to-br from-violet-600 via-purple-700 to-indigo-800 relative overflow-hidden">
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full blur-3xl" />
+        </div>
+        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <div className="text-5xl mb-6">🚀</div>
+          <h2 className="text-3xl sm:text-5xl font-extrabold text-white mb-6 leading-tight">
+            Ready to grow your business?
+          </h2>
+          <p className="text-white/70 text-lg mb-10 max-w-xl mx-auto">
+            Join hundreds of businesses already using BookmyX to streamline bookings and delight customers.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <button
               onClick={() => navigate('/create-salon')}
-              className="bg-white text-violet-700 px-8 py-3.5 rounded-2xl font-semibold hover:bg-violet-50 transition-colors flex items-center justify-center gap-2"
+              className="group flex items-center gap-2 bg-white text-violet-700 font-bold px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-all text-base"
             >
-              Register Now <ArrowRight size={18} />
+              Start for free
+              <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
             </button>
-            <a
-              href={whatsappLink}
-              target="_blank"
-              rel="noreferrer"
-              className="border border-white/30 text-white px-8 py-3.5 rounded-2xl font-medium hover:bg-white/10 transition-colors flex items-center justify-center gap-2"
+            <button
+              onClick={() => navigate('/super-admin')}
+              className="flex items-center gap-2 text-white/80 hover:text-white font-medium px-6 py-4 rounded-2xl border border-white/30 hover:border-white/60 transition-all text-sm"
             >
-              <MessageCircle size={18} /> Talk to Us
-            </a>
+              Sign in to your dashboard
+            </button>
           </div>
         </div>
       </section>
 
-      {/* ── Footer ── */}
-      <footer className="bg-gray-900 text-gray-400 py-10">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col md:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-gradient-to-br from-violet-600 to-indigo-700 rounded-lg flex items-center justify-center">
-              <Sparkles size={13} className="text-white" />
+      {/* ─── FOOTER ─────────────────────────────────────────── */}
+      <footer className="bg-gray-950 text-gray-400 py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8 mb-12">
+            <div className="md:col-span-2">
+              <div className="flex items-center gap-2.5 mb-4">
+                <div className="w-8 h-8 bg-gradient-to-br from-violet-600 to-purple-700 rounded-lg flex items-center justify-center">
+                  <Sparkles size={16} className="text-white" />
+                </div>
+                <span className="font-bold text-lg text-white">BookmyX</span>
+              </div>
+              <p className="text-sm leading-relaxed max-w-xs">
+                The all-in-one booking platform for salons, sports turfs, and clinics across India.
+              </p>
             </div>
-            <span className="text-white font-bold text-lg">BookmyX</span>
+            <div>
+              <h4 className="text-white font-semibold mb-4 text-sm">Platform</h4>
+              <ul className="space-y-2 text-sm">
+                {['Features', 'Pricing', 'How it works', 'API'].map(i => <li key={i}><a href="#" className="hover:text-white transition-colors">{i}</a></li>)}
+              </ul>
+            </div>
+            <div>
+              <h4 className="text-white font-semibold mb-4 text-sm">Company</h4>
+              <ul className="space-y-2 text-sm">
+                {['About', 'Blog', 'Careers', 'Contact'].map(i => <li key={i}><a href="#" className="hover:text-white transition-colors">{i}</a></li>)}
+              </ul>
+            </div>
           </div>
-          <p className="text-sm text-center">© 2026 BookmyX. All rights reserved. | Multi-Category Booking Platform</p>
-          <div className="flex gap-4 text-sm">
-            <a href={`/super-admin/login`} className="hover:text-white transition-colors">Super Admin</a>
-            <a href="/create-salon" className="hover:text-white transition-colors">Register</a>
+
+          <div className="border-t border-gray-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <p className="text-xs">© 2025 BookmyX. All rights reserved.</p>
+            <div className="flex items-center gap-4 text-xs">
+              <a href="#" className="hover:text-white transition-colors">Privacy Policy</a>
+              <a href="#" className="hover:text-white transition-colors">Terms of Service</a>
+            </div>
           </div>
         </div>
       </footer>

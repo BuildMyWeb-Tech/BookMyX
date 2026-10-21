@@ -255,117 +255,50 @@ const Dashboard = () => {
     );
   }
 
+  const statCards = [
+    { label: 'Stylists / Staff', value: dashData?.stylists || dashData?.doctors || 0, sub: 'Professionals on roster', icon: <Scissors size={22} />, color: 'bg-blue-500', light: 'bg-blue-50 text-blue-600' },
+    { label: 'Total Bookings', value: dashData?.appointments || 0, sub: 'All-time sessions booked', icon: <Calendar size={22} />, color: 'bg-violet-500', light: 'bg-violet-50 text-violet-600' },
+    { label: 'Customers', value: dashData?.clients || dashData?.patients || 0, sub: 'Registered clientele', icon: <UserCircle size={22} />, color: 'bg-emerald-500', light: 'bg-emerald-50 text-emerald-600' },
+    { label: 'Total Revenue', value: formatCurrency(dashData?.revenue || calculateTotalRevenue() || 0), sub: 'All-time earnings', icon: <IndianRupee size={22} />, color: 'bg-amber-500', light: 'bg-amber-50 text-amber-600' },
+    { label: "Today's Sessions", value: dashData?.todaysAppointments || countTodayAppointments() || 0, sub: 'Scheduled for today', icon: <Sparkles size={22} />, color: 'bg-pink-500', light: 'bg-pink-50 text-pink-600' },
+    { label: 'Monthly Revenue', value: formatCurrency(calculateMonthlyRevenue() || 0), sub: new Date().toLocaleString('default', { month: 'long', year: 'numeric' }), icon: <TrendingUp size={22} />, color: 'bg-indigo-500', light: 'bg-indigo-50 text-indigo-600' },
+    { label: 'Completion Rate', value: `${calculateCompletionRate()}%`, sub: 'Sessions completed', icon: <Award size={22} />, color: 'bg-teal-500', light: 'bg-teal-50 text-teal-600' },
+  ];
+
   return (
     dashData && (
-      <div className="max-w-7xl mx-auto bg-gray-50 min-h-screen">
-        <div className="mb-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 mb-2 flex items-center gap-2">
-            <Scissors className="text-primary" size={28} />
-            {shopDisplayName} Dashboard
-          </h1>
-          <p className="text-gray-600">Manage your salon performance and appointments</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all border border-gray-100">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xs sm:text-sm font-medium text-gray-500">Stylists</h3>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">{dashData.stylists || dashData.doctors || 0}</p>
-                <p className="text-[11px] sm:text-xs text-gray-400 mt-1">Expert hair professionals</p>
-              </div>
-              <div className="p-2.5 sm:p-3 rounded-lg bg-blue-50 text-blue-500">
-                <Scissors size={26} />
-              </div>
-            </div>
+      <div className="max-w-7xl mx-auto space-y-8">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-extrabold text-gray-900 tracking-tight">{shopDisplayName} Dashboard</h1>
+            <p className="text-sm text-gray-500 mt-0.5">Welcome back! Here&apos;s what&apos;s happening today.</p>
           </div>
-
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all border border-gray-100">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xs sm:text-sm font-medium text-gray-500">Total Bookings</h3>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">{dashData.appointments || 0}</p>
-                <p className="text-[11px] sm:text-xs text-gray-400 mt-1">Styling sessions booked</p>
-              </div>
-              <div className="p-2.5 sm:p-3 rounded-lg bg-purple-50 text-purple-500">
-                <Calendar size={26} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all border border-gray-100">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xs sm:text-sm font-medium text-gray-500">Customers</h3>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">{dashData.clients || dashData.patients || 0}</p>
-                <p className="text-[11px] sm:text-xs text-gray-400 mt-1">Salon clientele</p>
-              </div>
-              <div className="p-2.5 sm:p-3 rounded-lg bg-green-50 text-green-500">
-                <UserCircle size={26} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all border border-gray-100">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xs sm:text-sm font-medium text-gray-500">Overall Revenue</h3>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">{formatCurrency(dashData.revenue || calculateTotalRevenue() || 0)}</p>
-                <p className="text-[11px] sm:text-xs text-gray-400 mt-1">Total salon earnings</p>
-              </div>
-              <div className="p-2.5 sm:p-3 rounded-lg bg-amber-50 text-amber-500">
-                <IndianRupee size={26} />
-              </div>
-            </div>
+          <div className="flex items-center gap-2 text-xs text-gray-500 bg-white border border-gray-200 rounded-xl px-4 py-2.5 shadow-sm">
+            <Calendar size={14} className="text-primary" />
+            {new Date().toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 mt-5">
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all border border-gray-100">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xs sm:text-sm font-medium text-gray-500">Today's Styling Sessions</h3>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">{dashData.todaysAppointments || countTodayAppointments() || 0}</p>
-                <p className="text-[11px] sm:text-xs text-gray-400 mt-1">Sessions scheduled for today</p>
+        {/* KPI cards */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          {statCards.map((s, i) => (
+            <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all p-5">
+              <div className="flex items-start justify-between mb-3">
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">{s.label}</p>
+                <span className={`w-9 h-9 rounded-xl ${s.light} flex items-center justify-center flex-shrink-0`}>{s.icon}</span>
               </div>
-              <div className="p-2.5 sm:p-3 rounded-lg bg-pink-50 text-pink-500">
-                <Sparkles size={26} />
-              </div>
+              <p className="text-2xl font-extrabold text-gray-900 leading-none mb-1">{s.value}</p>
+              <p className="text-[11px] text-gray-400">{s.sub}</p>
             </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all border border-gray-100">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xs sm:text-sm font-medium text-gray-500">This Month's Revenue</h3>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">{formatCurrency(calculateMonthlyRevenue() || 0)}</p>
-                <p className="text-[11px] sm:text-xs text-gray-400 mt-1">Revenue for {new Date().toLocaleString('default', { month: 'long' })}</p>
-              </div>
-              <div className="p-2.5 sm:p-3 rounded-lg bg-purple-50 text-purple-500">
-                <TrendingUp size={26} />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all border border-gray-100">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xs sm:text-sm font-medium text-gray-500">Service Completion Rate</h3>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-800 mt-1 sm:mt-2">{calculateCompletionRate()}%</p>
-                <p className="text-[11px] sm:text-xs text-gray-400 mt-1">Styling sessions completed</p>
-              </div>
-              <div className="p-2.5 sm:p-3 rounded-lg bg-blue-50 text-blue-500">
-                <Award size={26} />
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <TrendingUp size={20} className="mr-2 text-blue-500" />
-              Salon Booking Trends
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="w-7 h-7 bg-blue-100 rounded-lg flex items-center justify-center"><TrendingUp size={15} className="text-blue-600" /></span>
+              Booking Trends (Last 30 days)
             </h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -381,9 +314,9 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <Scissors size={20} className="mr-2 text-green-500" />
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="w-7 h-7 bg-emerald-100 rounded-lg flex items-center justify-center"><Scissors size={15} className="text-emerald-600" /></span>
               Most Popular Services
             </h3>
             <div className="flex flex-col gap-6 lg:flex-row lg:gap-4 h-auto lg:h-80">
@@ -415,10 +348,10 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <IndianRupee size={20} className="mr-2 text-amber-500" />
-              Salon Revenue Analytics
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="w-7 h-7 bg-amber-100 rounded-lg flex items-center justify-center"><IndianRupee size={15} className="text-amber-600" /></span>
+              Revenue Analytics (6 months)
             </h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">
@@ -435,10 +368,10 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-              <Users size={20} className="mr-2 text-blue-500" />
-              Stylist Performance
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="text-base font-bold text-gray-800 mb-4 flex items-center gap-2">
+              <span className="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center"><Users size={15} className="text-violet-600" /></span>
+              Staff Performance
             </h3>
             <div className="h-80">
               <ResponsiveContainer width="100%" height="100%">

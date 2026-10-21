@@ -7,8 +7,64 @@ import {
   MapPin, Phone, Mail, Clock, Scissors, Star,
   Calendar, ArrowRight, AlertCircle, Loader2, Store,
   Sparkles, Users, Award, ChevronRight, CheckCircle2, Zap,
-  Plus, User, Instagram, Tag, Percent, IndianRupee
+  Plus, User, Instagram, Tag, Percent, IndianRupee,
+  Stethoscope, Dumbbell, UserCircle, Trophy,
 } from 'lucide-react';
+
+// Category-aware theme config
+const CATEGORY_THEME = {
+  salon: {
+    gradient: 'from-blue-600 via-blue-700 to-indigo-800',
+    accent: 'text-blue-600',
+    bg: 'bg-blue-50',
+    badge: 'bg-blue-100 text-blue-700',
+    btn: 'bg-blue-600 hover:bg-blue-700',
+    ring: 'ring-blue-200',
+    cardBg: 'from-blue-50 to-indigo-50',
+    icon: <Scissors size={32} className="text-white" />,
+    verifiedLabel: 'Verified Salon',
+    staffLabel: 'Expert Stylists',
+    staffIcon: <Users size={16} />,
+    bookLabel: 'Book Appointment',
+    feature1: 'Expert Stylists',
+    feature2: 'Our Services',
+    ctaLink: 'stylists',
+  },
+  doctor_clinic: {
+    gradient: 'from-sky-500 via-sky-600 to-cyan-700',
+    accent: 'text-sky-600',
+    bg: 'bg-sky-50',
+    badge: 'bg-sky-100 text-sky-700',
+    btn: 'bg-sky-600 hover:bg-sky-700',
+    ring: 'ring-sky-200',
+    cardBg: 'from-sky-50 to-cyan-50',
+    icon: <Stethoscope size={32} className="text-white" />,
+    verifiedLabel: 'Verified Clinic',
+    staffLabel: 'Our Doctors',
+    staffIcon: <UserCircle size={16} />,
+    bookLabel: 'Book Consultation',
+    feature1: 'Specialist Doctors',
+    feature2: 'Consultations',
+    ctaLink: 'stylists',
+  },
+  turf: {
+    gradient: 'from-emerald-600 via-emerald-700 to-teal-800',
+    accent: 'text-emerald-600',
+    bg: 'bg-emerald-50',
+    badge: 'bg-emerald-100 text-emerald-700',
+    btn: 'bg-emerald-600 hover:bg-emerald-700',
+    ring: 'ring-emerald-200',
+    cardBg: 'from-emerald-50 to-teal-50',
+    icon: <Dumbbell size={32} className="text-white" />,
+    verifiedLabel: 'Verified Turf',
+    staffLabel: 'Sports Grounds',
+    staffIcon: <Trophy size={16} />,
+    bookLabel: 'Book Slot',
+    feature1: 'Sports Grounds',
+    feature2: 'Available Slots',
+    ctaLink: '',
+  },
+};
 
 const ShopHome = () => {
   const { shopSlug } = useParams();
@@ -85,12 +141,15 @@ const ShopHome = () => {
 
   if (!currentShop) return null;
   const shop = currentShop;
+  const cat = shop.category || 'salon';
+  const theme = CATEGORY_THEME[cat] || CATEGORY_THEME.salon;
+  const ctaPath = theme.ctaLink ? `/${shopSlug}/${theme.ctaLink}` : `/${shopSlug}`;
 
   return (
     <div className="min-h-screen bg-gray-50">
 
       {/* ─── Hero Banner ─────────────────────────────── */}
-      <div className="bg-gradient-to-br from-primary via-blue-600 to-purple-700 text-white relative overflow-hidden">
+      <div className={`bg-gradient-to-br ${theme.gradient} text-white relative overflow-hidden`}>
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3 pointer-events-none" />
         <div className="absolute bottom-0 left-0 w-72 h-72 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/3 pointer-events-none" />
         <div className="absolute top-1/2 right-1/4 w-40 h-40 bg-white/5 rounded-full pointer-events-none" />
@@ -102,12 +161,12 @@ const ShopHome = () => {
                 className="w-20 h-20 rounded-2xl object-cover border-2 border-white/30 shadow-xl flex-shrink-0" />
             ) : (
               <div className="w-20 h-20 rounded-2xl bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0 border border-white/20">
-                <Scissors size={32} className="text-white" />
+                {theme.icon}
               </div>
             )}
             <div>
               <span className="inline-flex items-center gap-1 bg-white/20 text-white/90 text-xs font-medium px-3 py-1 rounded-full border border-white/20 mb-2">
-                <CheckCircle2 size={11} /> Verified Salon
+                <CheckCircle2 size={11} /> {theme.verifiedLabel}
               </span>
               <h1 className="text-3xl sm:text-5xl font-extrabold leading-tight">{shop.shopName}</h1>
               <p className="text-white/70 mt-1 text-sm sm:text-base">
@@ -135,9 +194,9 @@ const ShopHome = () => {
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link to={`/${shopSlug}/stylists`}
-              className="inline-flex items-center gap-2 bg-white text-primary font-bold px-7 py-3 rounded-xl hover:bg-white/90 transition-all shadow-lg shadow-black/20 text-sm">
-              <Calendar size={17} /> Book Appointment <ArrowRight size={15} />
+            <Link to={ctaPath}
+              className="inline-flex items-center gap-2 bg-white text-gray-900 font-bold px-7 py-3 rounded-xl hover:bg-white/90 transition-all shadow-lg shadow-black/20 text-sm">
+              <Calendar size={17} /> {theme.bookLabel} <ArrowRight size={15} />
             </Link>
             <Link to={`/${shopSlug}/services`}
               className="inline-flex items-center gap-2 bg-white/15 backdrop-blur-sm border border-white/25 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/25 transition-all text-sm">
@@ -147,7 +206,7 @@ const ShopHome = () => {
 
           <div className="mt-10 flex flex-wrap gap-6">
             {[
-              { icon: Users, label: 'Expert Stylists' },
+              { icon: Users, label: theme.staffLabel },
               { icon: Scissors, label: 'Our Services' },
               { icon: Zap, label: 'Instant Booking' },
               { icon: Star, label: 'Top Rated' },
@@ -263,7 +322,7 @@ const ShopHome = () => {
         )}
 
         {/* ─── Why Choose Us ──────────────────────────── */}
-        <section className="bg-gradient-to-br from-primary/5 via-blue-50 to-indigo-50 rounded-3xl p-8 sm:p-10">
+        <section className={`bg-gradient-to-br ${theme.cardBg} rounded-3xl p-8 sm:p-10`}>
           <div className="text-center mb-8">
             <h2 className="text-2xl font-bold text-gray-800">Why Choose {shop.shopName}?</h2>
             <p className="text-gray-500 text-sm mt-1">Experience the difference with our expert team</p>
@@ -327,9 +386,9 @@ const ShopHome = () => {
                   )}
                 </div>
               </div>
-              <Link to={`/${shopSlug}/stylists`}
-                className="flex-shrink-0 inline-flex items-center gap-2 bg-primary text-white font-semibold px-7 py-3.5 rounded-xl hover:bg-primary/90 transition-all shadow-md shadow-primary/25 text-sm">
-                <Calendar size={16} /> Book Appointment <ChevronRight size={15} />
+              <Link to={ctaPath}
+                className={`flex-shrink-0 inline-flex items-center gap-2 ${theme.btn} text-white font-semibold px-7 py-3.5 rounded-xl transition-all shadow-md text-sm`}>
+                <Calendar size={16} /> {theme.bookLabel} <ChevronRight size={15} />
               </Link>
             </div>
           </section>
