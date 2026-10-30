@@ -195,12 +195,12 @@ const ShopFooter = () => {
           © {new Date().getFullYear()} {shopName}. All Rights Reserved.
         </p>
         <p className="text-sm text-gray-500 mt-2 sm:mt-0">
-          Design and Developed by{' '}
+          Powered by{' '}
           <a
-            href="https://buildmyweb.info/"
+            href="http://buildmyweb.info/"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-primary font-medium hover:underline"
+            className="text-primary font-semibold hover:underline"
           >
             BuildMyWeb
           </a>

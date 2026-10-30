@@ -178,6 +178,22 @@ const AdminSidebar = ({ shopSlug: shopSlugProp }) => {
             {renderLinks(stylistLinks)}
           </ul>
         )}
+
+        {!collapsed && (
+          <div className="px-4 py-3 border-t border-gray-100 text-center">
+            <p className="text-[10px] text-gray-400">
+              Powered by{' '}
+              <a
+                href="http://buildmyweb.info/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary font-semibold hover:underline"
+              >
+                BuildMyWeb
+              </a>
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Mobile overlay */}
